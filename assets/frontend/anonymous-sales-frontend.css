@@ -1,0 +1,436 @@
+.anonymous-sales {
+    width: 100%;
+}
+
+.anonymous-sales button {
+    cursor: pointer;
+}
+
+.anonymous-sales-btn {
+    background: #0a5cd6;
+    color: #fff;
+    border: 0;
+    border-radius: 8px;
+    padding: 12px 18px;
+    font-weight: 600;
+}
+
+.anonymous-sales-open-btn,
+.anonymous-sales-submit-btn {
+    background: #0a5cd6;
+    color: #fff;
+    border: 0;
+    border-radius: 8px;
+    padding: 12px 18px;
+    font-weight: 600;
+}
+
+.anonymous-sales-dialog {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+}
+
+.anonymous-sales-dialog.is-open {
+    display: flex;
+}
+
+.anonymous-sales-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.anonymous-sales-panel {
+    position: relative;
+    width: min(900px, calc(100% - 24px));
+    max-height: calc(100vh - 48px);
+    overflow: auto;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+    padding: 20px;
+}
+
+.anonymous-sales-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.anonymous-sales-row .anonymous-sales-grow {
+    flex: 1 1 260px;
+}
+
+.anonymous-sales-list {
+    margin: 12px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.anonymous-sales-list li {
+    margin-bottom: 10px;
+}
+
+.anonymous-sales-resource-toolbar {
+    display: flex;
+    gap: 10px;
+    align-items: end;
+    flex-wrap: wrap;
+}
+
+.anonymous-sales-resource-search-wrap,
+.anonymous-sales-resource-per-page-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.anonymous-sales-resource-search {
+    min-width: 240px;
+    border: 1px solid #c8d3e6;
+    border-radius: 8px;
+    padding: 9px 10px;
+}
+
+.anonymous-sales-resource-per-page {
+    min-width: 90px;
+    border: 1px solid #c8d3e6;
+    border-radius: 8px;
+    padding: 9px 10px;
+}
+
+.anonymous-sales-resource-summary {
+    margin: 10px 0 0;
+    color: #314765;
+}
+
+.anonymous-sales-resource-toggle {
+    width: 100%;
+    text-align: left;
+    border: 1px solid #d5e0f1;
+    background: #f7faff;
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.anonymous-sales-resource-toggle[aria-expanded="true"] {
+    background: #eaf1fc;
+    border-color: #b9cbed;
+}
+
+.anonymous-sales-resource-order {
+    color: #425a7a;
+    min-width: 26px;
+}
+
+.anonymous-sales-resource-hint {
+    margin-left: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #5f7899;
+}
+
+.anonymous-sales-resource-chevron {
+    margin-left: auto;
+    color: #425a7a;
+    transition: transform 0.2s ease;
+}
+
+.anonymous-sales-list-item.is-expanded .anonymous-sales-resource-chevron {
+    transform: rotate(180deg);
+}
+
+.anonymous-sales-resource-panel {
+    margin-top: 8px;
+    border: 1px solid #d9e4f5;
+    border-radius: 10px;
+    background: #ffffff;
+    padding: 10px;
+}
+
+.anonymous-sales-resource-fields {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.anonymous-sales-resource-fields th,
+.anonymous-sales-resource-fields td {
+    border-bottom: 1px solid #eef2f8;
+    text-align: left;
+    vertical-align: top;
+    padding: 8px 6px;
+}
+
+.anonymous-sales-resource-fields th {
+    width: 180px;
+    color: #304461;
+}
+
+.anonymous-sales-resource-empty {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    background: #f4f7fb;
+}
+
+.anonymous-sales-resource-pagination {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.anonymous-sales-resource-page-btn {
+    border: 1px solid #c8d3e6;
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 8px 12px;
+}
+
+.anonymous-sales-resource-page-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.anonymous-sales-meta {
+    background: #f4f7fb;
+    border: 1px solid #d6e0f0;
+    border-radius: 10px;
+    padding: 12px;
+    cursor: copy;
+}
+
+.anonymous-sales-meta.is-attention {
+    animation: anonymousSalesOrderMetaBlink 0.9s ease-in-out infinite;
+    border: 3px solid #c0120f;
+}
+
+.anonymous-sales-meta.is-copied {
+    background: #e7f8ec;
+    border-color: #99d6ac;
+}
+
+.anonymous-sales-meta-warning {
+    margin: 0 0 10px;
+    color: #9b1c1c;
+}
+
+.anonymous-sales-copy-hint {
+    margin: 8px 0 0;
+    font-size: 13px;
+    color: #304461;
+}
+
+@keyframes anonymousSalesOrderMetaBlink {
+    0%   { box-shadow: 0 0 0 0px rgba(192, 18, 15, 0.0); border-color: #c0120f; }
+    50%  { box-shadow: 0 0 0 5px rgba(192, 18, 15, 0.45); border-color: #c0120f; }
+    100% { box-shadow: 0 0 0 0px rgba(192, 18, 15, 0.0); border-color: #c0120f; }
+}
+
+.anonymous-sales-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+.anonymous-sales-panel .anonymous-sales-secondary,
+.anonymous-sales-panel .anonymous-sales-check-status-btn {
+    display: inline-block;
+    background: #f4f7fb;
+    color: #1a3a6b;
+    border: 1.5px solid #b8cae8;
+    border-radius: 8px;
+    padding: 9px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    line-height: 1.4;
+    transition: background 0.15s, border-color 0.15s;
+    box-shadow: none;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.anonymous-sales-panel .anonymous-sales-secondary:hover,
+.anonymous-sales-panel .anonymous-sales-check-status-btn:hover {
+    background: #e2ecf8;
+    border-color: #7da3d6;
+}
+
+.anonymous-sales-panel .anonymous-sales-secondary:disabled,
+.anonymous-sales-panel .anonymous-sales-check-status-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.anonymous-sales-payment-link,
+.anonymous-sales-download-link {
+    background: #edf1f8;
+    color: #15233a;
+    border: 1px solid #c8d3e6;
+    border-radius: 8px;
+    padding: 10px 14px;
+    display: inline-block;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.anonymous-sales-accepted-crypto {
+    margin-top: 12px;
+    background: #f8fafd;
+    border: 1px solid #d8e5f5;
+    border-radius: 10px;
+    padding: 12px 14px;
+}
+
+.anonymous-sales-accepted-crypto summary {
+    cursor: pointer;
+    user-select: none;
+    font-weight: 700;
+    color: #1a3a6b;
+    font-size: 13px;
+}
+
+.anonymous-sales-accepted-crypto summary:hover {
+    color: #0a5cd6;
+}
+
+.anonymous-sales-inline-code {
+    font-family: Consolas, Monaco, monospace;
+    font-size: 13px;
+    background: #f3f5f8;
+    border-radius: 6px;
+    padding: 2px 6px;
+}
+
+.anonymous-sales-status {
+    margin-top: 8px;
+    padding: 10px;
+    border-radius: 8px;
+    background: #f4f7fb;
+}
+
+.anonymous-sales-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: transparent;
+    border: 0;
+    font-size: 18px;
+}
+
+.anonymous-sales-field {
+    margin-bottom: 12px;
+}
+
+.anonymous-sales-field label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+
+.anonymous-sales-field input,
+.anonymous-sales-field select {
+    width: 100%;
+    max-width: 420px;
+    border: 1px solid #c8d3e6;
+    border-radius: 8px;
+    padding: 9px 10px;
+}
+
+.anonymous-sales-status-check {
+    border-top: 1px solid #e0e6f0;
+    padding-top: 12px;
+    margin-top: 12px;
+}
+
+.anonymous-sales-status-result {
+    font-size: 13px;
+    color: #344054;
+    background: #f6f8fc;
+    border: 1px solid #e0e6f0;
+    border-radius: 6px;
+    padding: 8px 10px;
+    margin-top: 8px;
+}
+
+.anonymous-sales-download-wrap {
+    margin-top: 8px;
+}
+
+.anonymous-sales-crypto-info {
+    margin-top: 10px;
+    min-height: 18px;
+    font-size: 13px;
+    color: #475467;
+}
+
+.anonymous-sales-coin-group {
+    margin-top: 10px;
+}
+
+.anonymous-sales-coin-group:first-child {
+    margin-top: 0;
+}
+
+.anonymous-sales-coin-group-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #5a7a9c;
+    margin-bottom: 6px;
+}
+
+.anonymous-sales-coin-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.anonymous-sales-coin-chip {
+    display: inline-block;
+    background: #edf1f8;
+    color: #1a3a6b;
+    border: 1px solid #c5d4eb;
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.anonymous-sales-coin-chip--eligible {
+    background: #e8f7ed;
+    color: #165c2e;
+    border-color: #9fd6b0;
+}
+
+.anonymous-sales-coin-chip--ineligible {
+    background: #f5f5f5;
+    color: #666;
+    border-color: #d0d0d0;
+}
+
+.anonymous-sales-tab-close-hint {
+    margin: 10px 0 0;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #4a3800;
+    background: #fffbeb;
+    border: 1px solid #fcd34d;
+    border-radius: 8px;
+    line-height: 1.5;
+}

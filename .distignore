@@ -1,0 +1,10 @@
+.git
+.gitattributes
+.gitignore
+.distignore
+.wordpress-org
+bin
+dist
+node_modules
+README.md
+*.zip
