@@ -44,6 +44,14 @@ Anonymous Sales lets you sell files (or access to links) from your WordPress sit
 
 == Frequently Asked Questions ==
 
+= Should I test before I start selling? =
+
+Yes. Make one small test purchase on your own site with a low-priced offer and check that the order turns to paid and the PDF can be downloaded. Payments go to your real NOWPayments account, so the test is a real (small) payment.
+
+= How do I report a problem? =
+
+Open an issue at https://github.com/mjfutera/anonymousSalesPlugin/issues with your plugin, WordPress and PHP versions and, if you can, the relevant lines of the Error log (switch on debug logging in Settings first; secrets are masked, but read the text before you post it).
+
 = Do I need a NOWPayments account? =
 
 Yes. Payments are processed by NOWPayments (see "External services" below). You need an account, an API key and an IPN secret from them.

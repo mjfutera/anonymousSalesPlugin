@@ -1406,7 +1406,9 @@ function anonymous_sales_render_settings_page() {
     echo '<li>Go to <strong>Offers</strong>, create your first offer, upload resources (files) inside it.</li>';
     echo '<li>Add the buy button shortcode to any page or post:<br /><code>[anonymous_sales_buy offer_id="1"]</code></li>';
     echo '<li>Add the status shortcode to a page where buyers can check their order (e.g. a dedicated &ldquo;Check order&rdquo; page):<br /><code>[anonymous_sales_status]</code></li>';
+    echo '<li>Before you start selling, make one small test purchase with a low-priced offer and check that the order turns to paid and the PDF downloads. Payments go to your real NOWPayments account.</li>';
     echo '</ol>';
+    echo '<p>Something does not work? <a href="https://github.com/mjfutera/anonymousSalesPlugin/issues" target="_blank" rel="noopener noreferrer">Report it on GitHub</a> with your versions and the relevant lines of the Error log (turn on debug logging in <em>Lifecycle and logs</em> first).</p>';
     echo '</div></details>';
     echo '</div>';
 
