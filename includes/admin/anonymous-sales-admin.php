@@ -1611,7 +1611,7 @@ function anonymous_sales_render_info_cards() {
     echo '<li><a href="https://scalewithisaiah.com/" target="_blank" rel="noopener noreferrer">scalewithisaiah.com</a>: the second creator of this plugin</li>';
     echo '<li><a href="https://github.com/mjfutera/anonymousSalesPlugin" target="_blank" rel="noopener noreferrer">GitHub</a>: public source code of this plugin, issues and contributions</li>';
     echo '</ul>';
-    echo '<p class="description">Payments are processed by <a href="https://nowpayments.io/" target="_blank" rel="noopener noreferrer">NOWPayments</a>. You need your own NOWPayments account and API key. How to create the account and get the keys: <a href="https://faq.michalfutera.pro/nowpayments-create-account-and-get-keys" target="_blank" rel="noopener noreferrer">step-by-step guide</a> (the guide contains the author&#039;s affiliate link; the author may receive a commission from NOWPayments, you pay nothing extra).</p>';
+    echo '<p class="description">Payments are processed by NOWPayments. You need your own NOWPayments account and API key: <a href="https://faq.michalfutera.pro/nowpayments-create-account-and-get-keys" target="_blank" rel="noopener noreferrer">how to create the account and get the keys</a> (the guide contains an affiliate link).</p>';
     echo '</div>';
 
     if (get_user_meta(get_current_user_id(), $meta_key, true) === '1') {
