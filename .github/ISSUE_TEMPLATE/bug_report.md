@@ -15,7 +15,7 @@ A short description. What did you expect, what did you get?
 3.
 
 **Versions**
-- Anonymous Sales version:
+- MFPro Anonymous Digital Sales version:
 - WordPress version:
 - PHP version:
 - Cryptocurrency used (if a payment is involved):

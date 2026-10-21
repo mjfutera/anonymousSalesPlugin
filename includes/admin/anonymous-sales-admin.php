@@ -79,7 +79,7 @@ function anonymous_sales_register_admin_menu() {
     $parent_slug = 'anonymous-sales';
 
     add_menu_page(
-        'Anonymous Sales',
+        'MFPro Anonymous Digital Sales',
         'Anonymous Sales',
         $capability,
         $parent_slug,
@@ -101,6 +101,22 @@ function anonymous_sales_admin_enqueue_assets($hook_suffix) {
     }
 
     wp_enqueue_media();
+
+    // The scripts of the screens live in one file; the values they need come from PHP here.
+    wp_enqueue_script(
+        'anonymous-sales-admin',
+        ANONYMOUS_SALES_PLUGIN_URL . 'assets/admin/anonymous-sales-admin.js',
+        [],
+        ANONYMOUS_SALES_VERSION,
+        true
+    );
+    // The router address carries the auth key: only the two screens that call the router get it.
+    $needs_router = strpos($hook_suffix, 'anonymous-sales-offers') !== false || strpos($hook_suffix, 'anonymous-sales-settings') !== false;
+    wp_localize_script('anonymous-sales-admin', 'AnonymousSalesAdmin', [
+        'ajaxUrl'       => admin_url('admin-ajax.php'),
+        'routerUrl'     => $needs_router && function_exists('anonymous_sales_get_router_url') ? (string) anonymous_sales_get_router_url() : '',
+        'errorLogNonce' => wp_create_nonce('anonymous_sales_error_log_refresh'),
+    ]);
 
     wp_add_inline_style('common', '
         .anonymous-sales-admin-wrap { max-width: none; width: 100%; margin-right: 0; padding-right: 0; box-sizing: border-box; }
@@ -840,7 +856,7 @@ function anonymous_sales_handle_promocode_post() {
 }
 
 function anonymous_sales_render_dashboard_page() {
-    anonymous_sales_render_admin_page_start('Anonymous Sales', 'Central management panel for anonymous digital sales.');
+    anonymous_sales_render_admin_page_start('MFPro Anonymous Digital Sales', 'Central management panel for anonymous digital sales.');
 
     echo '<div class="card anonymous-sales-admin-card anonymous-sales-admin-full">';
     echo '<h2 style="margin-top: 0;">Universal endpoint</h2>';
@@ -878,8 +894,6 @@ function anonymous_sales_render_offers_page() {
     }
 
     $offer_price_cents = anonymous_sales_offer_price_to_cents($offer['offer_price']);
-    $router_url = function_exists('anonymous_sales_get_router_url') ? anonymous_sales_get_router_url() : '';
-
     anonymous_sales_render_admin_page_start('Offers', 'Create and update commercial offers.');
     anonymous_sales_admin_notice($notice);
     anonymous_sales_admin_notice($resource_notice);
@@ -1033,28 +1047,6 @@ function anonymous_sales_render_offers_page() {
 
     echo '</div>';
 
-    echo '<script>';
-    echo '(function(){';
-    echo 'var routerUrl=' . wp_json_encode((string) $router_url) . ';';
-    echo 'var input=document.getElementById("anonymous_sales_offer_price_cents");';
-    echo 'var preview=document.getElementById("anonymous_sales_offer_price_preview");';
-    echo 'if(input&&preview){var update=function(){var cents=parseInt(input.value||"0",10);if(isNaN(cents)||cents<0){cents=0;}preview.textContent="$"+(cents/100).toFixed(2);};input.addEventListener("input",update);update();}';
-    echo 'var checkBtn=document.getElementById("anonymous_sales_offer_check_approved_crypto");';
-    echo 'var checkResult=document.getElementById("anonymous_sales_offer_check_approved_crypto_result");';
-    echo 'if(checkBtn&&checkResult&&input&&routerUrl){checkBtn.addEventListener("click",function(){var cents=parseInt(input.value||"0",10);if(isNaN(cents)||cents<=0){checkResult.textContent="Set Price (cents) greater than 0 first.";return;}checkBtn.disabled=true;checkResult.textContent="Checking approved crypto...";var params=new URLSearchParams();params.set("action","check_approved_crypto");params.set("include_minimums","1");params.set("price_currency","usd");params.set("price_amount",String(cents/100));fetch(routerUrl,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded; charset=UTF-8"},body:params.toString()}).then(function(r){return r.json();}).then(function(data){if(!data||!data.success){checkResult.textContent=(data&&data.message)?data.message:"Could not fetch approved crypto list.";return;}var coins=Array.isArray(data.approved_coins)?data.approved_coins:[];if(!coins.length){checkResult.textContent="No approved crypto returned by NOWPayments.";return;}var eligible=Array.isArray(data.eligible_coins)?data.eligible_coins:[];var ineligible=Array.isArray(data.ineligible_coins)?data.ineligible_coins:[];var text="Approved crypto ("+coins.length+"):\n"+coins.join(", ")+"\n\nEligible for this price ("+eligible.length+"):\n"+(eligible.length?eligible.join(", "):"none");if(ineligible.length){text+="\n\nBelow minimum ("+ineligible.length+"):\n"+ineligible.join(", ");}checkResult.textContent=text;}).catch(function(){checkResult.textContent="Network error while checking approved crypto.";}).finally(function(){checkBtn.disabled=false;});});}';
-    echo 'var bindMediaPicker=function(buttonId,inputId,titleText,buttonText){var btn=document.getElementById(buttonId);var urlInput=document.getElementById(inputId);if(!btn||!urlInput){return;}btn.addEventListener("click",function(){if(typeof wp==="undefined"||!wp.media){window.alert("Media Library is not available. Please reload the page.");return;}var frame=wp.media({title:titleText,button:{text:buttonText},multiple:false});frame.on("select",function(){var selection=frame.state().get("selection").first();if(!selection){return;}var attachment=selection.toJSON();if(attachment&&attachment.url){urlInput.value=attachment.url;urlInput.dispatchEvent(new Event("input"));}});frame.open();});};';
-    echo 'var bindClear=function(buttonId,inputId){var btn=document.getElementById(buttonId);var urlInput=document.getElementById(inputId);if(!btn||!urlInput){return;}btn.addEventListener("click",function(){urlInput.value="";urlInput.dispatchEvent(new Event("input"));urlInput.focus();});};';
-    echo 'var bindImagePreview=function(inputId,imageId){var urlInput=document.getElementById(inputId);var img=document.getElementById(imageId);if(!urlInput||!img){return;}var refresh=function(){var url=(urlInput.value||"").trim();if(!url){img.hidden=true;img.removeAttribute("src");return;}img.src=url;};img.addEventListener("load",function(){img.hidden=false;});img.addEventListener("error",function(){img.hidden=true;});urlInput.addEventListener("input",refresh);refresh();};';
-    echo 'bindMediaPicker("anonymous_sales_pick_offer_logo","anonymous_sales_offer_logo_url","Select Offer Logo","Use this image");';
-    echo 'bindClear("anonymous_sales_clear_offer_logo","anonymous_sales_offer_logo_url");';
-    echo 'bindImagePreview("anonymous_sales_offer_logo_url","anonymous_sales_offer_logo_preview");';
-    echo 'bindMediaPicker("anonymous_sales_pick_resource_file","anonymous_sales_resource_address","Select Resource File","Use this file");';
-    echo 'bindClear("anonymous_sales_clear_resource_file","anonymous_sales_resource_address");';
-    echo 'var resourcePasswordInput=document.getElementById("anonymous_sales_resource_password");';
-    echo 'var resourcePasswordToggle=document.getElementById("anonymous_sales_toggle_resource_password");';
-    echo 'if(resourcePasswordInput&&resourcePasswordToggle){resourcePasswordToggle.addEventListener("click",function(){var isHidden=resourcePasswordInput.type==="password";resourcePasswordInput.type=isHidden?"text":"password";resourcePasswordToggle.textContent=isHidden?"Hide":"Show";});}';
-    echo '})();';
-    echo '</script>';
 
     anonymous_sales_render_admin_page_end();
 }
@@ -1222,116 +1214,8 @@ function anonymous_sales_render_orders_page() {
         }
         echo '</tbody></table>';
 
-        echo '<script>';
-        echo '(function(){';
-        echo 'var openButtons=document.querySelectorAll(".anonymous-sales-open-manual-status");';
-        echo 'openButtons.forEach(function(btn){';
-        echo 'btn.addEventListener("click",function(){';
-        echo 'var dialogId=btn.getAttribute("data-target-dialog")||"";';
-        echo 'if(!dialogId){return;}';
-        echo 'var dialog=document.getElementById(dialogId);';
-        echo 'if(!dialog||typeof dialog.showModal!=="function"){return;}';
-        echo 'dialog.showModal();';
-        echo '});';
-        echo '});';
-        echo 'var closeButtons=document.querySelectorAll(".anonymous-sales-close-manual-status");';
-        echo 'closeButtons.forEach(function(btn){';
-        echo 'btn.addEventListener("click",function(){';
-        echo 'var dialog=btn.closest("dialog");';
-        echo 'if(dialog){dialog.close();}';
-        echo '});';
-        echo '});';
-        echo 'var dialogs=document.querySelectorAll(".anonymous-sales-manual-status-dialog");';
-        echo 'dialogs.forEach(function(dialog){';
-        echo 'dialog.addEventListener("click",function(event){';
-        echo 'var rect=dialog.getBoundingClientRect();';
-        echo 'var inside=event.clientX>=rect.left&&event.clientX<=rect.right&&event.clientY>=rect.top&&event.clientY<=rect.bottom;';
-        echo 'if(!inside){dialog.close();}';
-        echo '});';
-        echo '});';
-        echo 'var forms=document.querySelectorAll(".anonymous-sales-manual-status-form");';
-        echo 'if(!forms.length){return;}';
-        echo 'forms.forEach(function(form){';
-        echo 'var select=form.querySelector("select[name=\"order_currentStatus\"]");';
-        echo 'var ack=form.querySelector(".anonymous-sales-manual-status-ack");';
-        echo 'var saveBtn=form.querySelector(".anonymous-sales-manual-status-save");';
-        echo 'var currentStatus=(form.getAttribute("data-current-status")||"").trim();';
-        echo 'var syncSaveState=function(){';
-        echo 'if(!select||!ack||!saveBtn){return;}';
-        echo 'var targetStatus=(select.value||"").trim();';
-        echo 'var changed=targetStatus!==""&&targetStatus!==currentStatus;';
-        echo 'saveBtn.disabled=!(changed&&ack.checked);';
-        echo '};';
-        echo 'if(select){select.addEventListener("change",syncSaveState);}';
-        echo 'if(ack){ack.addEventListener("change",syncSaveState);}';
-        echo 'syncSaveState();';
-        echo 'form.addEventListener("submit",function(event){';
-        echo 'var targetStatus=(select.value||"").trim();';
-        echo 'if(!select||!ack||!saveBtn){return;}';
-        echo 'if(!targetStatus||targetStatus===currentStatus){return;}';
-        echo 'if(!ack.checked){event.preventDefault();window.alert("Before manual status update, check the risk acknowledgment box.");return;}';
-        echo 'var message="Manual status change is NOT recommended.\\n\\nDo this only if payment was received outside NOWPayments, preferably after the NOWPayments payment link has expired.\\n\\nCurrent status: "+currentStatus+"\\nNew status: "+targetStatus+"\\n\\nDo you want to continue?";';
-        echo 'if(!window.confirm(message)){event.preventDefault();return;}';
-        echo 'saveBtn.disabled=true;';
-        echo 'var dialog=form.closest("dialog");if(dialog){dialog.close();}';
-        echo '});';
-        echo '});';
-        echo 'var deleteOpenBtns=document.querySelectorAll(".anonymous-sales-open-delete-order");';
-        echo 'deleteOpenBtns.forEach(function(btn){';
-        echo 'btn.addEventListener("click",function(){';
-        echo 'var dialogId=btn.getAttribute("data-target-dialog")||"";';
-        echo 'if(!dialogId){return;}';
-        echo 'var dialog=document.getElementById(dialogId);';
-        echo 'if(!dialog||typeof dialog.showModal!=="function"){return;}';
-        echo 'dialog.showModal();';
-        echo '});';
-        echo '});';
-        echo 'var deleteCloseBtns=document.querySelectorAll(".anonymous-sales-close-delete-order");';
-        echo 'deleteCloseBtns.forEach(function(btn){';
-        echo 'btn.addEventListener("click",function(){';
-        echo 'var dialog=btn.closest("dialog");';
-        echo 'if(dialog){dialog.close();}';
-        echo '});';
-        echo '});';
-        echo 'var deleteDialogs=document.querySelectorAll(".anonymous-sales-delete-order-dialog");';
-        echo 'deleteDialogs.forEach(function(dialog){';
-        echo 'dialog.addEventListener("click",function(event){';
-        echo 'var rect=dialog.getBoundingClientRect();';
-        echo 'var inside=event.clientX>=rect.left&&event.clientX<=rect.right&&event.clientY>=rect.top&&event.clientY<=rect.bottom;';
-        echo 'if(!inside){dialog.close();}';
-        echo '});';
-        echo '});';
-        echo '})();';
-        echo '</script>';
 
         // ─── E: Check NOW button JS ───────────────────────────────────────────
-        echo '<script>';
-        echo '(function(){';
-        echo 'var checkButtons=document.querySelectorAll(".anonymous-sales-check-order-now");';
-        echo 'checkButtons.forEach(function(btn){';
-        echo 'btn.addEventListener("click",function(){';
-        echo 'var orderId=btn.getAttribute("data-order-id")||"";';
-        echo 'var nonce=btn.getAttribute("data-nonce")||"";';
-        echo 'if(!orderId){return;}';
-        echo 'btn.disabled=true;btn.textContent="Checking...";';
-        echo 'var body=new FormData();';
-        echo 'body.append("action","anonymous_sales_check_order_now");';
-        echo 'body.append("order_id",orderId);';
-        echo 'body.append("nonce",nonce);';
-        echo 'fetch(' . wp_json_encode(admin_url('admin-ajax.php')) . ',{method:"POST",body:body})';
-        echo '.then(function(r){return r.json();})';
-        echo '.then(function(data){';
-        echo 'if(data&&data.success&&data.data&&data.data.new_status){';
-        echo 'var row=btn.closest("tr");';
-        echo 'if(row){var statusCell=row.querySelectorAll("td")[3];if(statusCell){statusCell.textContent=data.data.new_status;}}';
-        echo 'btn.textContent="Done";';
-        echo '}else{btn.textContent="No change";btn.disabled=false;}';
-        echo '})';
-        echo '.catch(function(){btn.textContent="Error";btn.disabled=false;});';
-        echo '});';
-        echo '});';
-        echo '})();';
-        echo '</script>';
         // ─────────────────────────────────────────────────────────────────────
     }
     echo '</div>';
@@ -1408,7 +1292,7 @@ function anonymous_sales_render_settings_page() {
     echo '<li>Add the status shortcode to a page where buyers can check their order (e.g. a dedicated &ldquo;Check order&rdquo; page):<br /><code>[anonymous_sales_status]</code></li>';
     echo '<li>Before you start selling, make one small test purchase with a low-priced offer and check that the order turns to paid and the PDF downloads. Payments go to your real NOWPayments account.</li>';
     echo '</ol>';
-    echo '<p>Something does not work? <a href="https://github.com/mjfutera/anonymousSalesPlugin/issues" target="_blank" rel="noopener noreferrer">Report it on GitHub</a> with your versions and the relevant lines of the Error log (turn on debug logging in <em>Lifecycle and logs</em> first).</p>';
+    echo '<p>Something does not work? <a href="https://github.com/mjfutera/mfpro-anonymous-digital-sales/issues" target="_blank" rel="noopener noreferrer">Report it on GitHub</a> with your versions and the relevant lines of the Error log (turn on debug logging in <em>Lifecycle and logs</em> first).</p>';
     echo '</div></details>';
     echo '</div>';
 
@@ -1546,43 +1430,6 @@ function anonymous_sales_render_settings_page() {
     submit_button('Save settings');
     echo '</form>';
 
-    echo '<script>';
-    echo '(function(){';
-    echo 'var keyRotationCheckbox=document.getElementById("anonymous_sales_regenerate_router_key");';
-    echo 'var approvedCryptoBtn=document.getElementById("anonymous_sales_check_approved_crypto");';
-    echo 'var approvedCryptoResult=document.getElementById("anonymous_sales_check_approved_crypto_result");';
-    echo 'var approvedCryptoPriceCents=document.getElementById("anonymous_sales_check_approved_crypto_price_cents");';
-    echo 'var routerUrl=' . wp_json_encode((string) $router_url) . ';';
-    echo 'if(!keyRotationCheckbox){return;}';
-    echo 'keyRotationCheckbox.addEventListener("change",function(){';
-    echo 'if(!keyRotationCheckbox.checked){return;}';
-    echo 'window.alert("Router key rotation is recommended only when there are no unfinished orders.");';
-    echo '});';
-    echo 'if(approvedCryptoBtn&&approvedCryptoResult&&routerUrl){';
-    echo 'approvedCryptoBtn.addEventListener("click",function(){';
-    echo 'approvedCryptoBtn.disabled=true;';
-    echo 'approvedCryptoResult.textContent="Checking approved crypto...";';
-    echo 'var params=new URLSearchParams();';
-    echo 'params.set("action","check_approved_crypto");';
-    echo 'if(approvedCryptoPriceCents&&approvedCryptoPriceCents.value){var cents=parseInt(approvedCryptoPriceCents.value,10)||0;if(cents>0){params.set("include_minimums","1");params.set("price_currency","usd");params.set("price_amount",String(cents/100));}}';
-    echo 'fetch(routerUrl,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded; charset=UTF-8"},body:params.toString()})';
-    echo '.then(function(r){return r.json();})';
-    echo '.then(function(data){';
-    echo 'if(!data||!data.success){approvedCryptoResult.textContent=(data&&data.message)?data.message:"Could not fetch approved crypto list.";return;}';
-    echo 'var coins=Array.isArray(data.approved_coins)?data.approved_coins:[];';
-    echo 'if(!coins.length){approvedCryptoResult.textContent="No approved crypto returned by NOWPayments.";return;}';
-    echo 'var text="Approved crypto ("+coins.length+"):\n"+coins.join(", ");';
-    echo 'var eligible=Array.isArray(data.eligible_coins)?data.eligible_coins:[];';
-    echo 'var ineligible=Array.isArray(data.ineligible_coins)?data.ineligible_coins:[];';
-    echo 'if(approvedCryptoPriceCents&&approvedCryptoPriceCents.value){text+="\n\nEligible for provided price ("+eligible.length+"):\n"+(eligible.length?eligible.join(", "):"none");if(ineligible.length){text+="\n\nBelow minimum ("+ineligible.length+"):\n"+ineligible.join(", ");}}';
-    echo 'approvedCryptoResult.textContent=text;';
-    echo '})';
-    echo '.catch(function(){approvedCryptoResult.textContent="Network error while checking approved crypto.";})';
-    echo '.finally(function(){approvedCryptoBtn.disabled=false;});';
-    echo '});';
-    echo '}';
-    echo '})();';
-    echo '</script>';
 
     anonymous_sales_render_info_cards();
 
@@ -1609,7 +1456,7 @@ function anonymous_sales_render_info_cards() {
     echo '<li><a href="https://faq.michalfutera.pro/" target="_blank" rel="noopener noreferrer">faq.michalfutera.pro</a>: questions and answers</li>';
     echo '<li><a href="https://blogmcp.michalfutera.pro/" target="_blank" rel="noopener noreferrer">blogmcp.michalfutera.pro</a>: MFPro Blog MCP, manage WordPress with AI (a separate service)</li>';
     echo '<li><a href="https://scalewithisaiah.com/" target="_blank" rel="noopener noreferrer">scalewithisaiah.com</a>: the second creator of this plugin</li>';
-    echo '<li><a href="https://github.com/mjfutera/anonymousSalesPlugin" target="_blank" rel="noopener noreferrer">GitHub</a>: public source code of this plugin, issues and contributions</li>';
+    echo '<li><a href="https://github.com/mjfutera/mfpro-anonymous-digital-sales" target="_blank" rel="noopener noreferrer">GitHub</a>: public source code of this plugin, issues and contributions</li>';
     echo '</ul>';
     echo '<p class="description">Payments are processed by NOWPayments. You need your own NOWPayments account and API key: <a href="https://faq.michalfutera.pro/nowpayments-create-account-and-get-keys" target="_blank" rel="noopener noreferrer">how to create the account and get the keys</a> (the guide contains an affiliate link).</p>';
     echo '</div>';
@@ -1686,7 +1533,6 @@ function anonymous_sales_render_error_log_page() {
 
     $error_log_preview = anonymous_sales_get_error_log_preview();
     $entries = anonymous_sales_parse_log_entries((string) ($error_log_preview['content'] ?? ''), true);
-    $refresh_nonce = wp_create_nonce('anonymous_sales_error_log_refresh');
 
     $log_file = function_exists('anonymous_sales_get_error_log_file_path')
         ? (string) anonymous_sales_get_error_log_file_path()
@@ -1766,120 +1612,6 @@ function anonymous_sales_render_error_log_page() {
     echo '</form>';
     echo '</div>';
 
-    echo '<script>';
-    echo '(function(){';
-    echo 'var ajaxUrl=' . wp_json_encode(admin_url('admin-ajax.php')) . ';';
-    echo 'var refreshNonce=' . wp_json_encode($refresh_nonce) . ';';
-    echo 'var levelFilter=document.getElementById("anonymous_sales_log_level_filter");';
-    echo 'var searchInput=document.getElementById("anonymous_sales_log_search");';
-    echo 'var rows=Array.prototype.slice.call(document.querySelectorAll(".anonymous-sales-log-row"));';
-    echo 'var rowsContainer=document.getElementById("anonymous_sales_log_rows");';
-    echo 'var countLabel=document.getElementById("anonymous_sales_log_count");';
-    echo 'var selectVisibleBtn=document.getElementById("anonymous_sales_log_select_visible");';
-    echo 'var clearSelectionBtn=document.getElementById("anonymous_sales_log_clear_selection");';
-    echo 'var refreshBtn=document.getElementById("anonymous_sales_log_refresh");';
-    echo 'var copySelectedBtn=document.getElementById("anonymous_sales_log_copy_selected");';
-    echo 'var copyAllBtn=document.getElementById("anonymous_sales_log_copy_all");';
-    echo 'var clearBtn=document.getElementById("anonymous_sales_clear_error_log_btn");';
-    echo 'var escapeHtml=function(text){';
-    echo 'return String(text||"").replace(/[&<>"\']/g,function(char){return ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","\'":"&#039;"})[char];});';
-    echo '};';
-    echo 'var badgeStyleByLevel=function(level){';
-    echo 'var key=String(level||"UNKNOWN").toUpperCase();';
-    echo 'if(key==="ERROR"){return "background:#fbeaea;color:#8b0000;border:1px solid #f1b5b5;";}';
-    echo 'if(key==="WARNING"){return "background:#fff7e6;color:#8a5800;border:1px solid #f0d195;";}';
-    echo 'if(key==="INFO"){return "background:#eaf4ff;color:#0b4f8a;border:1px solid #b8d8f5;";}';
-    echo 'if(key==="DEBUG"){return "background:#f2f2f4;color:#4d4d57;border:1px solid #d4d4dc;";}';
-    echo 'return "background:#f7f7f7;color:#555;border:1px solid #dcdcde;";';
-    echo '};';
-    echo 'var refreshRowsCache=function(){rows=Array.prototype.slice.call(document.querySelectorAll(".anonymous-sales-log-row"));};';
-    echo 'var renderRows=function(entries){';
-    echo 'if(!rowsContainer){return;}';
-    echo 'if(!entries||!entries.length){rowsContainer.innerHTML="";refreshRowsCache();applyFilters();return;}';
-    echo 'var html="";';
-    echo 'entries.forEach(function(entry,index){';
-    echo 'var level=String((entry&&entry.level)||"UNKNOWN").toUpperCase();';
-    echo 'var line=String((entry&&entry.line)||"");';
-    echo 'html+="<tr class=\"anonymous-sales-log-row\" data-level=\""+escapeHtml(level)+"\" data-line=\""+escapeHtml(line)+"\">";';
-    echo 'html+="<td><label style=\"display:flex;gap:6px;align-items:center;\"><input type=\"checkbox\" class=\"anonymous-sales-log-select\" /><span>"+String(index+1)+"</span></label></td>";';
-    echo 'html+="<td><span style=\"display:inline-block;min-width:72px;text-align:center;font-weight:700;border-radius:999px;padding:2px 8px;"+badgeStyleByLevel(level)+"\">"+escapeHtml(level)+"</span></td>";';
-    echo 'html+="<td><code style=\"display:block;white-space:pre-wrap;word-break:break-word;color:#8b0000;\">"+escapeHtml(line)+"</code></td></tr>";';
-    echo '});';
-    echo 'rowsContainer.innerHTML=html;';
-    echo 'refreshRowsCache();';
-    echo 'applyFilters();';
-    echo '};';
-    echo 'var copyText=function(text){';
-    echo 'if(!text){window.alert("There is no log content to copy.");return;}';
-    echo 'if(navigator.clipboard&&navigator.clipboard.writeText){';
-    echo 'navigator.clipboard.writeText(text).then(function(){window.alert("Copied to clipboard.");}).catch(function(){fallbackCopy(text);});';
-    echo 'return;';
-    echo '}';
-    echo 'fallbackCopy(text);';
-    echo '};';
-    echo 'var fallbackCopy=function(text){';
-    echo 'var helper=document.createElement("textarea");';
-    echo 'helper.value=text;';
-    echo 'helper.setAttribute("readonly","readonly");';
-    echo 'helper.style.position="fixed";helper.style.opacity="0";helper.style.pointerEvents="none";';
-    echo 'document.body.appendChild(helper);';
-    echo 'helper.select();';
-    echo 'var ok=false;';
-    echo 'try{ok=document.execCommand("copy");}catch(e){ok=false;}';
-    echo 'document.body.removeChild(helper);';
-    echo 'window.alert(ok?"Copied to clipboard.":"Copy failed. Please copy manually.");';
-    echo '};';
-    echo 'var getVisibleRows=function(){return rows.filter(function(row){return row.style.display!=="none";});};';
-    echo 'var applyFilters=function(){';
-    echo 'var level=(levelFilter&&levelFilter.value)?levelFilter.value:"ALL";';
-    echo 'var query=((searchInput&&searchInput.value)||"").trim().toLowerCase();';
-    echo 'var visible=0;';
-    echo 'rows.forEach(function(row){';
-    echo 'var rowLevel=(row.getAttribute("data-level")||"UNKNOWN").toUpperCase();';
-    echo 'var line=(row.getAttribute("data-line")||"").toLowerCase();';
-    echo 'var levelMatch=level==="ALL"||rowLevel===level;';
-    echo 'var queryMatch=query===""||line.indexOf(query)!==-1;';
-    echo 'var show=levelMatch&&queryMatch;';
-    echo 'row.style.display=show?"":"none";';
-    echo 'if(show){visible++;}';
-    echo '});';
-    echo 'if(countLabel){countLabel.textContent="Visible: "+visible+" / "+rows.length;}';
-    echo '};';
-    echo 'if(levelFilter){levelFilter.addEventListener("change",applyFilters);}';
-    echo 'if(searchInput){searchInput.addEventListener("input",applyFilters);}';
-    echo 'if(selectVisibleBtn){selectVisibleBtn.addEventListener("click",function(){getVisibleRows().forEach(function(row){var box=row.querySelector(".anonymous-sales-log-select");if(box){box.checked=true;}});});}';
-    echo 'if(clearSelectionBtn){clearSelectionBtn.addEventListener("click",function(){rows.forEach(function(row){var box=row.querySelector(".anonymous-sales-log-select");if(box){box.checked=false;}});});}';
-    echo 'if(refreshBtn){refreshBtn.addEventListener("click",function(){';
-    echo 'refreshBtn.disabled=true;';
-    echo 'refreshBtn.textContent="Refreshing...";';
-    echo 'var body=new URLSearchParams();';
-    echo 'body.append("action","anonymous_sales_refresh_error_log");';
-    echo 'body.append("nonce",refreshNonce);';
-    echo 'fetch(ajaxUrl,{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/x-www-form-urlencoded; charset=UTF-8"},body:body.toString()})';
-    echo '.then(function(response){return response.json();})';
-    echo '.then(function(payload){';
-    echo 'if(!payload||payload.success!==true){throw new Error("Refresh failed");}';
-    echo 'renderRows(Array.isArray(payload.data&&payload.data.entries)?payload.data.entries:[]);';
-    echo '})';
-    echo '.catch(function(){window.alert("Could not refresh log preview.");})';
-    echo '.finally(function(){refreshBtn.disabled=false;refreshBtn.textContent="Refresh";});';
-    echo '});}';
-    echo 'if(copySelectedBtn){copySelectedBtn.addEventListener("click",function(){';
-    echo 'var selectedLines=[];';
-    echo 'rows.forEach(function(row){var box=row.querySelector(".anonymous-sales-log-select");if(box&&box.checked){selectedLines.push(row.getAttribute("data-line")||"");}});';
-    echo 'copyText(selectedLines.join("\\n"));';
-    echo '});}';
-    echo 'if(copyAllBtn){copyAllBtn.addEventListener("click",function(){';
-    echo 'var allLines=rows.map(function(row){return row.getAttribute("data-line")||"";});';
-    echo 'copyText(allLines.join("\\n"));';
-    echo '});}';
-    echo 'if(clearBtn){clearBtn.addEventListener("click",function(event){';
-    echo 'var confirmed=window.confirm("Clearing the error log is not recommended. Are you sure you want to clear it?");';
-    echo 'if(!confirmed){event.preventDefault();}';
-    echo '});}';
-    echo 'applyFilters();';
-    echo '})();';
-    echo '</script>';
 
     anonymous_sales_render_admin_page_end();
 }

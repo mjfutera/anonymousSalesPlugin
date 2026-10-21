@@ -1,5 +1,5 @@
 // Builds the release folder and zip for the WordPress.org directory:
-//   node bin/build.mjs            -> dist/anonymous-sales/ and dist/anonymous-sales.zip
+//   node bin/build.mjs            -> dist/mfpro-anonymous-digital-sales/ and dist/mfpro-anonymous-digital-sales.zip
 // Everything listed in .distignore stays out (git files, bin/, dist/, .wordpress-org/ ...).
 // The folder is named after the plugin slug, the main file keeps its name.
 import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync } from 'node:fs'
@@ -8,7 +8,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
-const slug = 'anonymous-sales'
+const slug = 'mfpro-anonymous-digital-sales'
 const out = path.join(root, 'dist', slug)
 const zip = path.join(root, 'dist', `${slug}.zip`)
 

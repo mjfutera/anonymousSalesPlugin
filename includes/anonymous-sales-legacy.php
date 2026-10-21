@@ -82,7 +82,7 @@ function anonymous_sales_migrate_legacy_data() {
 
     wp_clear_scheduled_hook('mfpro_anonymoussalesplugin_poll_pending_orders');
 
-    // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- renaming this plugin's own user meta key.
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- one-time rename of this plugin's own user meta key during the migration from the old name.
     $wpdb->update($wpdb->usermeta, ['meta_key' => 'anonymous_sales_blogmcp_card_dismissed'], ['meta_key' => 'mfpro_anonymoussalesplugin_blogmcp_card_dismissed']);
 }
 

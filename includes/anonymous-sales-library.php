@@ -393,7 +393,7 @@ class Anonymous_Sales_PDF extends FPDF {
         $this->SetFont('Arial', 'I', 7);
         $this->SetTextColor(120, 135, 156);
         $this->SetX($margin);
-        $this->Cell($pageWidth - (2 * $margin), 4, 'The creators of Anonymous Sales are not responsible for the content sold via this platform.', 0, 1, 'L');
+        $this->Cell($pageWidth - (2 * $margin), 4, 'The creators of MFPro Anonymous Digital Sales are not responsible for the content sold via this platform.', 0, 1, 'L');
         $this->Ln(1);
 
         // Separator line

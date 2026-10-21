@@ -1,10 +1,10 @@
-=== Anonymous Sales ===
+=== MFPro Anonymous Digital Sales ===
 Contributors: mjfutera
 Tags: crypto, digital downloads, anonymous, sell files, nowpayments
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.4.0
+Stable tag: 1.4.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -12,7 +12,7 @@ Sell digital files for cryptocurrency without collecting any customer data. Orde
 
 == Description ==
 
-Anonymous Sales lets you sell files (or access to links) from your WordPress site without asking buyers for a name, an e-mail address or an account. The buyer picks a cryptocurrency, pays, and keeps an order number plus a secret receipt token. That pair is the only thing that identifies an order.
+MFPro Anonymous Digital Sales lets you sell files (or access to links) from your WordPress site without asking buyers for a name, an e-mail address or an account. The buyer picks a cryptocurrency, pays, and keeps an order number plus a secret receipt token. That pair is the only thing that identifies an order.
 
 **What you get**
 
@@ -29,7 +29,7 @@ Anonymous Sales lets you sell files (or access to links) from your WordPress sit
 * Second creator: https://scalewithisaiah.com
 * FAQ and guides: https://faq.michalfutera.pro
 * MFPro Blog MCP, a separate service by the same author that connects WordPress to AI assistants (optional, this plugin works without it): https://blogmcp.michalfutera.pro
-* Source code, issues and contributions: https://github.com/mjfutera/anonymousSalesPlugin
+* Source code, issues and contributions: https://github.com/mjfutera/mfpro-anonymous-digital-sales
 
 **You need your own NOWPayments account.** The plugin does not process payments itself and has no fee of its own. How to create the account and get the keys: https://faq.michalfutera.pro/nowpayments-create-account-and-get-keys . Note: that guide contains the author's affiliate (referral) link to NOWPayments; the author may receive a commission, you pay nothing extra.
 
@@ -50,7 +50,7 @@ Yes. Make one small test purchase on your own site with a low-priced offer and c
 
 = How do I report a problem? =
 
-Open an issue at https://github.com/mjfutera/anonymousSalesPlugin/issues with your plugin, WordPress and PHP versions and, if you can, the relevant lines of the Error log (switch on debug logging in Settings first; secrets are masked, but read the text before you post it).
+Open an issue at https://github.com/mjfutera/mfpro-anonymous-digital-sales/issues with your plugin, WordPress and PHP versions and, if you can, the relevant lines of the Error log (switch on debug logging in Settings first; secrets are masked, but read the text before you post it).
 
 = Do I need a NOWPayments account? =
 
@@ -90,13 +90,18 @@ This plugin connects to one external service, **NOWPayments** (https://nowpaymen
 
 == Source code ==
 
-The full, human-readable source of this plugin is public: https://github.com/mjfutera/anonymousSalesPlugin. It is the same code as in the package. The release package is built from it with `node bin/build.mjs`.
+The full, human-readable source of this plugin is public: https://github.com/mjfutera/mfpro-anonymous-digital-sales. It is the same code as in the package. The release package is built from it with `node bin/build.mjs`.
 
 == Third party libraries ==
 
 * FPDF 1.86 by Olivier Plathey (http://www.fpdf.org), used to build the PDF access sheet. FPDF is released under a permissive license with no usage restrictions.
 
 == Changelog ==
+
+= 1.4.1 =
+* Renamed to MFPro Anonymous Digital Sales (directory slug: mfpro-anonymous-digital-sales). The admin menu keeps the short label "Anonymous Sales".
+* The scripts of the admin screens are now a file loaded with wp_enqueue_script instead of inline script tags.
+* Everything a shortcode returns, including HTML added through its filters, is passed through wp_kses.
 
 = 1.4.0 =
 * Prepared for the WordPress.org directory: new name, readme, GPL license header.
@@ -110,6 +115,9 @@ The full, human-readable source of this plugin is public: https://github.com/mjf
 * Payment confirmation fixes and security hardening.
 
 == Upgrade Notice ==
+
+= 1.4.1 =
+The plugin is now called MFPro Anonymous Digital Sales. Nothing changes in your data, offers or orders.
 
 = 1.4.0 =
 The plugin was renamed to Anonymous Sales. Logs move to wp-content/uploads/anonymous-sales and the debug log is now off until you switch it on in Settings.

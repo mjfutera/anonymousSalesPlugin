@@ -1,24 +1,24 @@
 <?php
 
 /*
- * Plugin Name:       Anonymous Sales
- * Plugin URI:        https://github.com/mjfutera/anonymousSalesPlugin
+ * Plugin Name:       MFPro Anonymous Digital Sales
+ * Plugin URI:        https://github.com/mjfutera/mfpro-anonymous-digital-sales
  * Description:       Sell digital files for cryptocurrency without collecting any customer data. Fully anonymous orders, payments through NOWPayments.
- * Version:           1.4.0
+ * Version:           1.4.1
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            Michal Futera
  * Author URI:        https://michalfutera.pro/
  * License:           GPL v2 or later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain:       anonymous-sales
+ * Text Domain:       mfpro-anonymous-digital-sales
  */
 
 defined('ABSPATH') || exit;
 
 // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- The plugin owns these tables; table names come from its own schema (anonymous_sales_get_schema_names), never from user input, and every value goes through $wpdb->prepare() or the format arguments of insert()/update().
 
-define('ANONYMOUS_SALES_VERSION', '1.4.0');
+define('ANONYMOUS_SALES_VERSION', '1.4.1');
 define('ANONYMOUS_SALES_PLUGIN_FILE', __FILE__);
 define('ANONYMOUS_SALES_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('ANONYMOUS_SALES_PLUGIN_URL', plugin_dir_url(__FILE__));
@@ -93,7 +93,7 @@ function anonymous_sales_library_missing_notice() {
     }
 
     echo '<div class="notice notice-error"><p>';
-    echo 'Anonymous Sales: missing required file <code>includes/anonymous-sales-library.php</code>.';
+    echo 'MFPro Anonymous Digital Sales: missing required file <code>includes/anonymous-sales-library.php</code>.';
     echo '</p></div>';
 }
 
@@ -586,7 +586,7 @@ add_filter('cron_schedules', function($schedules) {
     if (!isset($schedules['anonymous_sales_5min'])) {
         $schedules['anonymous_sales_5min'] = [
             'interval' => 5 * MINUTE_IN_SECONDS,
-            'display'  => 'Every 5 minutes (Anonymous Sales)',
+            'display'  => 'Every 5 minutes (MFPro Anonymous Digital Sales)',
         ];
     }
     return $schedules;
@@ -692,7 +692,7 @@ function anonymous_sales_plugin_row_meta($links, $file) {
     }
 
     $links[] = '<a href="https://faq.michalfutera.pro/" target="_blank" rel="noopener noreferrer">FAQ</a>';
-    $links[] = '<a href="https://github.com/mjfutera/anonymousSalesPlugin" target="_blank" rel="noopener noreferrer">Source code</a>';
+    $links[] = '<a href="https://github.com/mjfutera/mfpro-anonymous-digital-sales" target="_blank" rel="noopener noreferrer">Source code</a>';
     $links[] = '<a href="https://blogmcp.michalfutera.pro/" target="_blank" rel="noopener noreferrer">MFPro Blog MCP</a>';
 
     return $links;
@@ -773,7 +773,7 @@ function anonymous_sales_maybe_serve_external_order_script() {
 
         status_header(500);
         header('Content-Type: application/javascript; charset=UTF-8');
-        echo 'window.console && console.error("Anonymous Sales API module is not available.");';
+        echo 'window.console && console.error("MFPro Anonymous Digital Sales API module is not available.");';
         exit;
     }
 
@@ -838,6 +838,37 @@ function anonymous_sales_maybe_serve_external_order_script() {
     exit;
 }
 
+/**
+ * What a shortcode may return. WordPress prints the return value as it is, so the whole
+ * result -- including whatever other code adds through the before/after/html filters --
+ * goes through wp_kses with this list: the post tags plus the form controls and the
+ * disclosure element of the buy dialog and the status form.
+ */
+function anonymous_sales_shortcode_allowed_html() {
+    $allowed = wp_kses_allowed_html('post');
+    $controls = [
+        'form' => ['class' => true, 'id' => true, 'action' => true, 'method' => true, 'hidden' => true, 'data-*' => true],
+        'input' => ['class' => true, 'id' => true, 'type' => true, 'name' => true, 'value' => true, 'placeholder' => true, 'required' => true, 'readonly' => true, 'disabled' => true, 'checked' => true, 'autocomplete' => true, 'min' => true, 'max' => true, 'step' => true, 'hidden' => true, 'data-*' => true],
+        'select' => ['class' => true, 'id' => true, 'name' => true, 'required' => true, 'disabled' => true, 'data-*' => true],
+        'option' => ['value' => true, 'selected' => true, 'disabled' => true],
+        'textarea' => ['class' => true, 'id' => true, 'name' => true, 'placeholder' => true, 'required' => true, 'readonly' => true, 'rows' => true, 'cols' => true, 'data-*' => true],
+        'label' => ['class' => true, 'for' => true],
+        'button' => ['class' => true, 'id' => true, 'type' => true, 'name' => true, 'value' => true, 'disabled' => true, 'aria-expanded' => true, 'aria-label' => true, 'data-*' => true],
+        'details' => ['class' => true, 'open' => true, 'data-*' => true],
+        'summary' => ['class' => true],
+    ];
+    foreach ($controls as $tag => $attributes) {
+        $existing = isset($allowed[$tag]) && is_array($allowed[$tag]) ? $allowed[$tag] : [];
+        $allowed[$tag] = array_merge($existing, $attributes);
+    }
+
+    return apply_filters('anonymous_sales_shortcode_allowed_html', $allowed);
+}
+
+function anonymous_sales_shortcode_output($html) {
+    return wp_kses((string) $html, anonymous_sales_shortcode_allowed_html());
+}
+
 function anonymous_sales_shortcode_buy_button($atts = []) {
     if (!function_exists('anonymous_sales_get_offer_record')) {
         return '';
@@ -861,12 +892,12 @@ function anonymous_sales_shortcode_buy_button($atts = []) {
 
     $offer_id = absint($atts['offer_id']);
     if ($offer_id <= 0) {
-        return apply_filters('anonymous_sales_shortcode_buy_html', '<p>Invalid offer ID.</p>', $atts, null, []);
+        return anonymous_sales_shortcode_output(apply_filters('anonymous_sales_shortcode_buy_html', '<p>Invalid offer ID.</p>', $atts, null, []));
     }
 
     $offer = anonymous_sales_get_offer_record($offer_id);
     if (!is_array($offer)) {
-        return apply_filters('anonymous_sales_shortcode_buy_html', '<p>Offer not found.</p>', $atts, null, []);
+        return anonymous_sales_shortcode_output(apply_filters('anonymous_sales_shortcode_buy_html', '<p>Offer not found.</p>', $atts, null, []));
     }
 
     $resources = anonymous_sales_get_offer_resources($offer_id);
@@ -1015,7 +1046,7 @@ function anonymous_sales_shortcode_buy_button($atts = []) {
     $html = apply_filters('anonymous_sales_shortcode_buy_html', $html, $atts, $offer, $resources);
     do_action('anonymous_sales_shortcode_buy_rendered', $atts, $offer, $resources, $html);
 
-    return $html;
+    return anonymous_sales_shortcode_output($html);
 }
 
 function anonymous_sales_shortcode_status_form($atts = []) {
@@ -1072,7 +1103,7 @@ function anonymous_sales_shortcode_status_form($atts = []) {
     $html = apply_filters('anonymous_sales_shortcode_status_html', $html, $atts);
     do_action('anonymous_sales_shortcode_status_rendered', $atts, $html);
 
-    return $html;
+    return anonymous_sales_shortcode_output($html);
 }
 
 add_action('init', 'anonymous_sales_register_frontend_assets');

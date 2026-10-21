@@ -472,7 +472,7 @@ function anonymous_sales_create_nowpayments_payment(array $offer, array $order, 
         'price_amount' => anonymous_sales_offer_price_to_usd($offer['offer_price']),
         'price_currency' => strtolower((string) $currency),
         'order_id' => (string) $order['order_stamp'],
-        'order_description' => sprintf('Anonymous Sales order %s', $order['order_stamp']),
+        'order_description' => sprintf('MFPro Anonymous Digital Sales order %s', $order['order_stamp']),
         // Back to the page the order came from, with only the order number: the claim
         // token must not reach NOWPayments (their logs and dashboard would hold it).
         'success_url' => add_query_arg(
